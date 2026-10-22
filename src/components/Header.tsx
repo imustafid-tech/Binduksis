@@ -10,6 +10,8 @@ import {
   PlusCircle,
   Printer,
   ChevronDown,
+  LogOut,
+  KeyRound,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -17,6 +19,8 @@ export const Header: React.FC = () => {
     profilSekolah,
     userSession,
     switchRole,
+    setIsLogoutConfirmOpen,
+    setIsEditCredentialsOpen,
     students,
     searchQuery,
     setSearchQuery,
@@ -26,6 +30,7 @@ export const Header: React.FC = () => {
     setIsPrintRekapOpen,
     setIsSchoolSettingsOpen,
   } = useApp();
+
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -89,7 +94,7 @@ export const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Actions & Role Switcher */}
+          {/* Right Actions, Role Switcher & Logout */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {userSession.role === 'admin' ? (
               <>
@@ -204,9 +209,57 @@ export const Header: React.FC = () => {
                       </button>
                     ))}
                   </div>
+
+                  {/* Dropdown bottom actions: Edit credentials & Logout */}
+                  <div className="border-t border-slate-800 pt-1 mt-1 px-1 space-y-0.5">
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        setIsEditCredentialsOpen(true);
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs font-semibold text-amber-400 hover:bg-amber-950/40 hover:text-amber-300 rounded-lg flex items-center gap-2 cursor-pointer transition-colors"
+                      title="Ubah Username dan Kata Sandi Akun"
+                    >
+                      <KeyRound className="w-3.5 h-3.5" />
+                      <span>Ubah Username & Password</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        setIsLogoutConfirmOpen(true);
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 rounded-lg flex items-center gap-2 cursor-pointer transition-colors"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Keluar (Logout)</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
+
+            {/* Direct Quick Button: Ubah Sandi */}
+            <button
+              onClick={() => setIsEditCredentialsOpen(true)}
+              className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 border border-slate-700 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer shadow-xs"
+              title="Ubah Username & Password"
+              aria-label="Ubah Username dan Password"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden xl:inline">Ubah Sandi</span>
+            </button>
+
+            {/* Direct Logout Button in Header */}
+            <button
+              onClick={() => setIsLogoutConfirmOpen(true)}
+              className="inline-flex items-center gap-1.5 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer shadow-xs"
+              title="Keluar dari akun Anda"
+              aria-label="Keluar / Logout"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
           </div>
         </div>
       </div>

@@ -269,3 +269,106 @@ test('formatTanggalIndo formats dates correctly', () => {
   assert.equal(formatTanggalIndo('2010-08-17'), '17 Agustus 2010');
   assert.equal(formatTanggalIndo(''), '-');
 });
+
+test('authenticateAdmin validates correct credentials and rejects invalid ones', async () => {
+  const { authenticateAdmin } = await import('./studentLogic');
+  // Valid credentials
+  assert.equal(authenticateAdmin('admin', 'admin123').success, true);
+  assert.equal(authenticateAdmin('tatausaha', 'admin123').success, true);
+  assert.equal(authenticateAdmin('197908152005012007', 'admin123').success, true);
+
+  // Invalid password
+  assert.equal(authenticateAdmin('admin', 'wrongpass').success, false);
+  // Invalid username
+  assert.equal(authenticateAdmin('unknownuser', 'admin123').success, false);
+  // Empty
+  assert.equal(authenticateAdmin('', '').success, false);
+});
+
+test('authenticateStudent validates matching student identifier and birthdate/PIN', async () => {
+  const { authenticateStudent } = await import('./studentLogic');
+  const mockSiswa: any = [
+    {
+      id: 'sis-1',
+      nis: '230101',
+      nisn: '0098273641',
+      namaLengkap: 'Muhammad Raditya Pratama',
+      tanggalLahir: '2010-05-14',
+    },
+  ];
+
+  // Match by NIS and exact birthdate
+  const res1 = authenticateStudent(mockSiswa, '230101', '2010-05-14');
+  assert.equal(res1.success, true);
+  assert.equal(res1.student?.namaLengkap, 'Muhammad Raditya Pratama');
+
+  // Match by NISN and master PIN
+  const res2 = authenticateStudent(mockSiswa, '0098273641', 'siswa123');
+  assert.equal(res2.success, true);
+
+  // Match by birthdate without dashes
+  const res3 = authenticateStudent(mockSiswa, '230101', '20100514');
+  assert.equal(res3.success, true);
+
+  // Wrong birthdate
+  const res4 = authenticateStudent(mockSiswa, '230101', '2011-01-01');
+  assert.equal(res4.success, false);
+
+  // Unknown NIS
+  const res5 = authenticateStudent(mockSiswa, '999999', 'siswa123');
+  assert.equal(res5.success, false);
+});
+
+test('validateNewUsername checks username length and characters', async () => {
+  const { validateNewUsername } = await import('./studentLogic');
+  assert.equal(validateNewUsername('admin_baru').valid, true);
+  assert.equal(validateNewUsername('tu.smp1').valid, true);
+  assert.equal(validateNewUsername('ab').valid, false); // < 3 chars
+  assert.equal(validateNewUsername('').valid, false);
+  assert.equal(validateNewUsername('admin#$!').valid, false);
+});
+
+test('validateNewPassword checks length and calculates strength', async () => {
+  const { validateNewPassword } = await import('./studentLogic');
+  assert.equal(validateNewPassword('12345').valid, false); // < 6 chars
+  assert.equal(validateNewPassword('123456').valid, true);
+  assert.equal(validateNewPassword('123456').strength, 'medium');
+  assert.equal(validateNewPassword('Admin2024!').strength, 'strong');
+});
+
+test('authenticateAdmin supports updated custom credentials', async () => {
+  const { authenticateAdmin } = await import('./studentLogic');
+  const custom = {
+    username: 'kepalatu',
+    passwordHashOrPlain: 'RahasiaSMP2024!',
+  };
+
+  // Should succeed with the new custom username and password
+  assert.equal(authenticateAdmin('kepalatu', 'RahasiaSMP2024!', custom).success, true);
+  // Should fail with wrong password for new custom username
+  assert.equal(authenticateAdmin('kepalatu', 'wrong', custom).success, false);
+});
+
+test('authenticateStudent supports student custom password', async () => {
+  const { authenticateStudent } = await import('./studentLogic');
+  const mockSiswa: any = [
+    {
+      id: 'sis-10',
+      nis: '240501',
+      namaLengkap: 'Anisa Rahma',
+      tanggalLahir: '2011-03-15',
+    },
+  ];
+
+  const customPasswords = {
+    'sis-10': 'anisa_rahasia_123',
+  };
+
+  // Custom password works
+  const res1 = authenticateStudent(mockSiswa, '240501', 'anisa_rahasia_123', customPasswords);
+  assert.equal(res1.success, true);
+  // Birthdate still works as fallback
+  const res2 = authenticateStudent(mockSiswa, '240501', '2011-03-15', customPasswords);
+  assert.equal(res2.success, true);
+});
+

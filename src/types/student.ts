@@ -177,7 +177,20 @@ export interface BackupData {
 }
 
 export interface UserSession {
+  isAuthenticated: boolean;
   role: 'admin' | 'siswa';
   siswaId?: string; // If role === 'siswa'
   namaUser: string;
+  usernameOrNip?: string;
+  loginTime?: string;
+  avatarUrl?: string;
 }
+
+export interface AdminCredentials {
+  username: string;
+  passwordHashOrPlain: string;
+  updatedAt?: string;
+}
+
+export type StudentPasswordMap = Record<string, string>;
+

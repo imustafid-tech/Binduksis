@@ -2,6 +2,8 @@ import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
+import { LoginView } from './components/LoginView';
+import { LogoutConfirmModal } from './components/LogoutConfirmModal';
 import { DashboardView } from './components/DashboardView';
 import { StudentListView } from './components/StudentListView';
 import { AcademicView } from './components/AcademicView';
@@ -14,7 +16,8 @@ import { StudentDetailModal } from './components/StudentDetailModal';
 import { PrintBukuInduk } from './components/PrintBukuInduk';
 import { PrintRekapModal } from './components/PrintRekapModal';
 import { SchoolSettingsModal } from './components/SchoolSettingsModal';
-import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
+import { EditCredentialsModal } from './components/EditCredentialsModal';
+import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 
 const MainContent: React.FC = () => {
   const { currentTab, userSession, toast } = useApp();
@@ -31,38 +34,47 @@ const MainContent: React.FC = () => {
         </div>
       )}
 
-      {/* Top Header */}
-      <Header />
+      {/* Authentication Check: If not logged in, show Login Screen */}
+      {!userSession.isAuthenticated ? (
+        <LoginView />
+      ) : (
+        <>
+          {/* Top Header */}
+          <Header />
 
-      {/* Body Layout */}
-      <div className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto">
-        {/* Sidebar only for Admin TU role */}
-        {userSession.role === 'admin' && <Sidebar />}
+          {/* Body Layout */}
+          <div className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto">
+            {/* Sidebar only for Admin TU role */}
+            {userSession.role === 'admin' && <Sidebar />}
 
-        {/* Dynamic Main View */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
-          {userSession.role === 'siswa' ? (
-            <StudentPortalView />
-          ) : (
-            <>
-              {currentTab === 'dashboard' && <DashboardView />}
-              {currentTab === 'siswa' && <StudentListView />}
-              {currentTab === 'akademik' && <AcademicView />}
-              {currentTab === 'prestasi' && <AchievementView />}
-              {currentTab === 'ijazah' && <GraduationView />}
-              {currentTab === 'cetak' && <StudentListView />}
-              {currentTab === 'backup' && <BackupRestoreView />}
-            </>
-          )}
-        </main>
-      </div>
+            {/* Dynamic Main View */}
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
+              {userSession.role === 'siswa' ? (
+                <StudentPortalView />
+              ) : (
+                <>
+                  {currentTab === 'dashboard' && <DashboardView />}
+                  {currentTab === 'siswa' && <StudentListView />}
+                  {currentTab === 'akademik' && <AcademicView />}
+                  {currentTab === 'prestasi' && <AchievementView />}
+                  {currentTab === 'ijazah' && <GraduationView />}
+                  {currentTab === 'cetak' && <StudentListView />}
+                  {currentTab === 'backup' && <BackupRestoreView />}
+                </>
+              )}
+            </main>
+          </div>
 
-      {/* Global Modals */}
-      <StudentFormModal />
-      <StudentDetailModal />
-      <PrintBukuInduk />
-      <PrintRekapModal />
-      <SchoolSettingsModal />
+          {/* Global Modals */}
+          <StudentFormModal />
+          <StudentDetailModal />
+          <PrintBukuInduk />
+          <PrintRekapModal />
+          <SchoolSettingsModal />
+          <LogoutConfirmModal />
+          <EditCredentialsModal />
+        </>
+      )}
     </div>
   );
 };

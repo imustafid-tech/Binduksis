@@ -10,6 +10,8 @@ import {
   Printer,
   Database,
   Building2,
+  LogOut,
+  KeyRound,
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -20,6 +22,9 @@ export const Sidebar: React.FC = () => {
     setIsFormOpen,
     setEditingStudent,
     setIsSchoolSettingsOpen,
+    setIsLogoutConfirmOpen,
+    setIsEditCredentialsOpen,
+    userSession,
   } = useApp();
 
   const totalPrestasi = students.reduce((acc, s) => acc + (s.prestasi ? s.prestasi.length : 0), 0);
@@ -96,6 +101,25 @@ export const Sidebar: React.FC = () => {
         setIsSchoolSettingsOpen(true);
       },
     },
+    {
+      id: 'credentials',
+      label: 'Ganti Sandi',
+      fullLabel: 'Ubah Sandi & Akun',
+      icon: KeyRound,
+      action: () => {
+        setIsEditCredentialsOpen(true);
+      },
+    },
+    {
+      id: 'logout',
+      label: 'Logout',
+      fullLabel: 'Keluar (Logout)',
+      icon: LogOut,
+      isLogout: true,
+      action: () => {
+        setIsLogoutConfirmOpen(true);
+      },
+    },
   ];
 
   return (
@@ -105,6 +129,8 @@ export const Sidebar: React.FC = () => {
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentTab === item.id;
+          const isLogout = item.isLogout;
+
           return (
             <button
               key={item.id}
@@ -116,7 +142,9 @@ export const Sidebar: React.FC = () => {
                 }
               }}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
-                isActive
+                isLogout
+                  ? 'text-rose-600 bg-rose-50 hover:bg-rose-100'
+                  : isActive
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'text-slate-600 bg-slate-50 hover:bg-slate-100'
               }`}
@@ -149,6 +177,7 @@ export const Sidebar: React.FC = () => {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentTab === item.id;
+            const isLogout = item.isLogout;
 
             return (
               <button
@@ -161,7 +190,9 @@ export const Sidebar: React.FC = () => {
                   }
                 }}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  isActive
+                  isLogout
+                    ? 'text-rose-600 hover:bg-rose-50 hover:text-rose-700 mt-2 border-t border-slate-100 pt-3'
+                    : isActive
                     ? 'bg-emerald-50 text-emerald-700 font-bold border-l-4 border-emerald-600 shadow-xs'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
@@ -169,7 +200,11 @@ export const Sidebar: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <Icon
                     className={`w-4 h-4 ${
-                      isActive ? 'text-emerald-600' : 'text-slate-400 group-hover:text-slate-600'
+                      isLogout
+                        ? 'text-rose-500'
+                        : isActive
+                        ? 'text-emerald-600'
+                        : 'text-slate-400 group-hover:text-slate-600'
                     }`}
                   />
                   <span>{item.fullLabel}</span>
@@ -191,7 +226,7 @@ export const Sidebar: React.FC = () => {
 
         {/* Footer Info */}
         <div className="p-4 border-t border-slate-100 text-[11px] text-slate-500 bg-slate-50/70">
-          <div className="font-semibold text-slate-700">Kemendikbudristek RI</div>
+          <div className="font-semibold text-slate-700">{userSession.namaUser || 'Petugas TU'}</div>
           <div className="text-slate-500 mt-0.5">Buku Induk Registrasi Siswa</div>
           <div className="text-[10px] text-slate-400 mt-1">Edisi Digital Terpadu v2.4</div>
         </div>

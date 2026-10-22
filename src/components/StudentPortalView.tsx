@@ -15,6 +15,8 @@ import {
   AlertCircle,
   HelpCircle,
   Shield,
+  LogOut,
+  KeyRound,
 } from 'lucide-react';
 
 export const StudentPortalView: React.FC = () => {
@@ -23,6 +25,8 @@ export const StudentPortalView: React.FC = () => {
     userSession,
     switchRole,
     setPrintingStudent,
+    setIsLogoutConfirmOpen,
+    setIsEditCredentialsOpen,
     updateStudent,
     profilSekolah,
     showToast,
@@ -114,11 +118,29 @@ export const StudentPortalView: React.FC = () => {
               </button>
 
               <button
+                onClick={() => setIsEditCredentialsOpen(true)}
+                className="inline-flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700 text-amber-300 font-semibold text-xs px-3.5 py-2 rounded-lg border border-slate-700 transition-colors cursor-pointer shadow-sm"
+                title="Ubah kata sandi login mandiri siswa"
+              >
+                <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+                <span>Ubah Kata Sandi</span>
+              </button>
+
+              <button
                 onClick={() => switchRole('admin')}
                 className="inline-flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3 py-2 rounded-lg border border-slate-700 transition-colors cursor-pointer"
               >
                 <Shield className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Beralih ke Admin TU</span>
+              </button>
+
+              <button
+                onClick={() => setIsLogoutConfirmOpen(true)}
+                className="inline-flex items-center gap-1.5 bg-rose-600/30 hover:bg-rose-600 text-rose-200 hover:text-white text-xs font-semibold px-3 py-2 rounded-lg border border-rose-500/30 transition-colors cursor-pointer"
+                title="Keluar dari Portal Siswa"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Keluar (Logout)</span>
               </button>
             </div>
           </div>

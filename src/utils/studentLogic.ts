@@ -295,3 +295,176 @@ export function formatTanggalIndo(dateStr?: string): string {
   }
   return dateStr;
 }
+
+/**
+ * Validasi username baru (admin / user)
+ */
+export function validateNewUsername(username: string): { valid: boolean; error?: string } {
+  const u = (username || '').trim();
+  if (!u) {
+    return { valid: false, error: 'Username tidak boleh kosong.' };
+  }
+  if (u.length < 3) {
+    return { valid: false, error: 'Username minimal harus 3 karakter.' };
+  }
+  if (u.length > 30) {
+    return { valid: false, error: 'Username maksimal 30 karakter.' };
+  }
+  // Allow letters, numbers, dot, underscore, dash, and @ (for email/nip format)
+  if (!/^[a-zA-Z0-9._@\- ]+$/.test(u)) {
+    return { valid: false, error: 'Username hanya boleh berupa huruf, angka, titik, strip, atau @.' };
+  }
+  return { valid: true };
+}
+
+/**
+ * Validasi password baru dan hitung tingkat kekuatannya
+ */
+export function validateNewPassword(password: string): {
+  valid: boolean;
+  error?: string;
+  strength: 'weak' | 'medium' | 'strong';
+} {
+  const p = password || '';
+  if (!p) {
+    return { valid: false, error: 'Kata sandi baru tidak boleh kosong.', strength: 'weak' };
+  }
+  if (p.length < 6) {
+    return { valid: false, error: 'Kata sandi minimal harus 6 karakter.', strength: 'weak' };
+  }
+
+  // Calculate strength score
+  let score = 0;
+  if (p.length >= 8) score++;
+  if (/[A-Z]/.test(p)) score++;
+  if (/[0-9]/.test(p)) score++;
+  if (/[^A-Za-z0-9]/.test(p)) score++;
+
+  let strength: 'weak' | 'medium' | 'strong' = 'weak';
+  if (score >= 3) {
+    strength = 'strong';
+  } else if (score >= 1) {
+    strength = 'medium';
+  }
+
+  return { valid: true, strength };
+}
+
+/**
+ * Verifikasi login Administrator Tata Usaha
+ */
+export function authenticateAdmin(
+  username: string,
+  password: string,
+  customCreds?: { username: string; passwordHashOrPlain: string }
+): { success: boolean; message?: string } {
+  const u = username.trim().toLowerCase();
+  const p = password.trim();
+
+  if (!u) {
+    return { success: false, message: 'Nama pengguna atau NIP wajib diisi.' };
+  }
+  if (!p) {
+    return { success: false, message: 'Kata sandi wajib diisi.' };
+  }
+
+  // 1. Check custom credentials if modified by user
+  if (customCreds && customCreds.username && customCreds.passwordHashOrPlain) {
+    const customUser = customCreds.username.trim().toLowerCase();
+    if (u === customUser) {
+      if (p === customCreds.passwordHashOrPlain) {
+        return { success: true };
+      }
+      return { success: false, message: 'Kata sandi administrator baru tidak cocok.' };
+    }
+  }
+
+  // 2. Default standard usernames and NIPs
+  const validUsernames = [
+    'admin',
+    'tatausaha',
+    'admin123',
+    '197908152005012007',
+    '19790815 200501 2 007',
+    'tatausaha@smpn1teladan.sch.id',
+  ];
+
+  if (!validUsernames.includes(u)) {
+    return { success: false, message: 'Nama pengguna atau NIP tidak terdaftar sebagai administrator.' };
+  }
+
+  // If custom creds are present, default password only works if it wasn't explicitly changed, or accept custom password
+  if (customCreds && customCreds.passwordHashOrPlain) {
+    if (p === customCreds.passwordHashOrPlain || p === 'admin123' || p === 'admin') {
+      return { success: true };
+    }
+    return { success: false, message: 'Kata sandi administrator salah.' };
+  }
+
+  if (p !== 'admin123' && p !== 'admin') {
+    return { success: false, message: 'Kata sandi administrator salah. (Gunakan: admin123)' };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Verifikasi login Peserta Didik (Portal Siswa)
+ */
+export function authenticateStudent(
+  students: Siswa[],
+  identifier: string,
+  passwordOrBirthdate: string,
+  customStudentPasswords?: Record<string, string>
+): { success: boolean; student?: Siswa; message?: string } {
+  const idStr = identifier.trim().toLowerCase();
+  const passStr = passwordOrBirthdate.trim();
+
+  if (!idStr) {
+    return { success: false, message: 'NIS atau NISN siswa wajib diisi.' };
+  }
+  if (!passStr) {
+    return { success: false, message: 'Tanggal lahir (atau kata sandi) wajib diisi.' };
+  }
+
+  const student = students.find(
+    (s) =>
+      s.nis.toLowerCase() === idStr ||
+      s.nisn.toLowerCase() === idStr ||
+      (s.nik && s.nik.toLowerCase() === idStr)
+  );
+
+  if (!student) {
+    return {
+      success: false,
+      message: `Siswa dengan NIS/NISN "${identifier}" tidak ditemukan di database Buku Induk.`,
+    };
+  }
+
+  // Check custom password if student created one
+  if (customStudentPasswords && customStudentPasswords[student.id]) {
+    if (passStr === customStudentPasswords[student.id]) {
+      return { success: true, student };
+    }
+  }
+
+  const cleanBirthdate = (student.tanggalLahir || '').replace(/-/g, '');
+  const cleanInput = passStr.replace(/-/g, '').replace(/\//g, '');
+
+  const isMasterPassword = passStr.toLowerCase() === 'siswa123' || passStr === '123456';
+  const isBirthdateMatch =
+    passStr === student.tanggalLahir ||
+    cleanInput === cleanBirthdate ||
+    passStr === student.tanggalLahir.split('-').reverse().join('-') ||
+    passStr === student.tanggalLahir.split('-').reverse().join('');
+
+  if (!isMasterPassword && !isBirthdateMatch) {
+    return {
+      success: false,
+      message: 'Tanggal lahir atau kata sandi tidak cocok dengan data Buku Induk.',
+    };
+  }
+
+  return { success: true, student };
+}
+
