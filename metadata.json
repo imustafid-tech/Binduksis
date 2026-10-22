@@ -1,0 +1,6 @@
+{
+  "name": "Buku Induk Siswa SMP",
+  "description": "Sistem Informasi Buku Induk Siswa SMP resmi dengan input data komprehensif, pencarian cepat, data orang tua mendetail, riwayat akademik & prestasi, data ijazah SD/SMP, hak akses admin & siswa, serta backup & restore.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
