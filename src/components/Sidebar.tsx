@@ -12,6 +12,9 @@ import {
   Building2,
   LogOut,
   KeyRound,
+  UploadCloud,
+  FileSpreadsheet,
+  Rocket,
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -24,6 +27,9 @@ export const Sidebar: React.FC = () => {
     setIsSchoolSettingsOpen,
     setIsLogoutConfirmOpen,
     setIsEditCredentialsOpen,
+    setIsStudentUploadOpen,
+    setIsAcademicUploadOpen,
+    setIsDeployGuideOpen,
     userSession,
   } = useApp();
 
@@ -56,11 +62,33 @@ export const Sidebar: React.FC = () => {
       },
     },
     {
+      id: 'upload-siswa',
+      label: 'Upload Siswa',
+      fullLabel: 'Upload Data Siswa (Excel)',
+      icon: UploadCloud,
+      action: () => {
+        setIsStudentUploadOpen(true);
+      },
+      badge: 'Excel/CSV',
+      badgeColor: 'bg-emerald-100 text-emerald-800',
+    },
+    {
       id: 'akademik',
       label: 'Akademik',
       fullLabel: 'Akademik & Rapor',
       icon: BookOpen,
       badge: null,
+    },
+    {
+      id: 'upload-rapor',
+      label: 'Upload Rapor',
+      fullLabel: 'Upload Nilai Rapor (Excel)',
+      icon: FileSpreadsheet,
+      action: () => {
+        setIsAcademicUploadOpen(true);
+      },
+      badge: 'Excel/CSV',
+      badgeColor: 'bg-blue-100 text-blue-800',
     },
     {
       id: 'prestasi',
@@ -91,6 +119,17 @@ export const Sidebar: React.FC = () => {
       fullLabel: 'Backup & Restore',
       icon: Database,
       badge: null,
+    },
+    {
+      id: 'deploy-hosting',
+      label: 'Deploy',
+      fullLabel: 'Siap Deploy Hosting',
+      icon: Rocket,
+      action: () => {
+        setIsDeployGuideOpen(true);
+      },
+      badge: 'Siap',
+      badgeColor: 'bg-indigo-100 text-indigo-800',
     },
     {
       id: 'pengaturan',

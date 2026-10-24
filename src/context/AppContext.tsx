@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Siswa, ProfilSekolah, UserSession, BackupData, AdminCredentials, StudentPasswordMap } from '../types/student';
+import { Siswa, ProfilSekolah, UserSession, BackupData, AdminCredentials, StudentPasswordMap, RaporSemester } from '../types/student';
 import { INITIAL_STUDENTS, INITIAL_PROFIL_SEKOLAH } from '../data/sampleData';
 import { authenticateAdmin, authenticateStudent, validateNewUsername, validateNewPassword } from '../utils/studentLogic';
 
@@ -53,10 +53,20 @@ interface AppContextType {
   isSchoolSettingsOpen: boolean;
   setIsSchoolSettingsOpen: (open: boolean) => void;
 
+  // Upload modals & deploy guide
+  isStudentUploadOpen: boolean;
+  setIsStudentUploadOpen: (open: boolean) => void;
+  isAcademicUploadOpen: boolean;
+  setIsAcademicUploadOpen: (open: boolean) => void;
+  isDeployGuideOpen: boolean;
+  setIsDeployGuideOpen: (open: boolean) => void;
+
   // Actions
   addStudent: (siswaData: Omit<Siswa, 'id'>) => string;
   updateStudent: (id: string, siswaData: Partial<Siswa>) => void;
   deleteStudent: (id: string) => void;
+  bulkAddStudents: (newStudents: Omit<Siswa, 'id'>[], updateExisting?: boolean) => { added: number; updated: number };
+  bulkUpdateGrades: (updates: { studentId: string; semesterRecord: RaporSemester }[]) => { updated: number };
   updateProfilSekolah: (data: Partial<ProfilSekolah>) => void;
   restoreBackup: (backup: BackupData) => void;
   resetToDefaultData: () => void;
@@ -163,6 +173,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
   const [isPrintRekapOpen, setIsPrintRekapOpen] = useState<boolean>(false);
   const [isSchoolSettingsOpen, setIsSchoolSettingsOpen] = useState<boolean>(false);
+  const [isStudentUploadOpen, setIsStudentUploadOpen] = useState<boolean>(false);
+  const [isAcademicUploadOpen, setIsAcademicUploadOpen] = useState<boolean>(false);
+  const [isDeployGuideOpen, setIsDeployGuideOpen] = useState<boolean>(false);
 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
@@ -374,6 +387,91 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(`Data siswa ${target?.namaLengkap || ''} berhasil dihapus dari sistem.`, 'info');
   };
 
+  const bulkAddStudents = (
+    newStudentsData: Omit<Siswa, 'id'>[],
+    updateExisting: boolean = true
+  ): { added: number; updated: number } => {
+    let addedCount = 0;
+    let updatedCount = 0;
+
+    setStudents((prev) => {
+      const existingMap = new Map<string, Siswa>();
+      prev.forEach((s) => existingMap.set(s.nis.trim().toLowerCase(), s));
+
+      const updatedList = [...prev];
+
+      newStudentsData.forEach((newS) => {
+        const nisKey = newS.nis.trim().toLowerCase();
+        if (existingMap.has(nisKey)) {
+          if (updateExisting) {
+            const oldStudent = existingMap.get(nisKey)!;
+            const merged: Siswa = {
+              ...oldStudent,
+              ...newS,
+              id: oldStudent.id,
+              recordsSemester: newS.recordsSemester && newS.recordsSemester.length > 0 ? newS.recordsSemester : oldStudent.recordsSemester,
+              prestasi: newS.prestasi && newS.prestasi.length > 0 ? newS.prestasi : oldStudent.prestasi,
+            };
+            const idx = updatedList.findIndex((item) => item.id === oldStudent.id);
+            if (idx !== -1) {
+              updatedList[idx] = merged;
+            }
+            existingMap.set(nisKey, merged);
+            updatedCount++;
+          }
+        } else {
+          const freshId = `sis-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
+          const fullStudent: Siswa = {
+            ...newS,
+            id: freshId,
+          };
+          updatedList.unshift(fullStudent);
+          existingMap.set(nisKey, fullStudent);
+          addedCount++;
+        }
+      });
+
+      return updatedList;
+    });
+
+    showToast(`Berhasil memproses data siswa: ${addedCount} baru ditambahkan, ${updatedCount} diperbarui.`, 'success');
+    return { added: addedCount, updated: updatedCount };
+  };
+
+  const bulkUpdateGrades = (
+    updates: { studentId: string; semesterRecord: RaporSemester }[]
+  ): { updated: number } => {
+    let count = 0;
+
+    setStudents((prev) =>
+      prev.map((s) => {
+        const targetUpdate = updates.find((u) => u.studentId === s.id);
+        if (!targetUpdate) return s;
+
+        const currentRecords = [...(s.recordsSemester || [])];
+        const recordIndex = currentRecords.findIndex(
+          (r) => r.semester === targetUpdate.semesterRecord.semester
+        );
+
+        if (recordIndex >= 0) {
+          currentRecords[recordIndex] = targetUpdate.semesterRecord;
+        } else {
+          currentRecords.push(targetUpdate.semesterRecord);
+          currentRecords.sort((a, b) => a.semester - b.semester);
+        }
+
+        count++;
+        return {
+          ...s,
+          recordsSemester: currentRecords,
+        };
+      })
+    );
+
+    showToast(`Berhasil mengunggah & memperbarui nilai rapor ${updates.length} siswa!`, 'success');
+    return { updated: count };
+  };
+
   const updateProfilSekolah = (data: Partial<ProfilSekolah>) => {
     setProfilSekolah((prev) => ({ ...prev, ...data }));
     showToast('Profil sekolah berhasil diperbarui.', 'success');
@@ -433,7 +531,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsPrintRekapOpen,
         isSchoolSettingsOpen,
         setIsSchoolSettingsOpen,
+        isStudentUploadOpen,
+        setIsStudentUploadOpen,
+        isAcademicUploadOpen,
+        setIsAcademicUploadOpen,
+        isDeployGuideOpen,
+        setIsDeployGuideOpen,
         addStudent,
+        bulkAddStudents,
+        bulkUpdateGrades,
         updateStudent,
         deleteStudent,
         updateProfilSekolah,

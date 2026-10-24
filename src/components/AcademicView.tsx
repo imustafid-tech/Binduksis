@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { BookOpen, Search, Eye, Filter, Award, ChevronRight, Plus } from 'lucide-react';
+import { BookOpen, Search, Eye, Filter, Award, ChevronRight, Plus, UploadCloud } from 'lucide-react';
 import { calculateSemesterAverage } from '../utils/studentLogic';
 
 export const AcademicView: React.FC = () => {
-  const { students, setSelectedStudent, setIsDetailOpen, setEditingStudent, setIsFormOpen } = useApp();
+  const {
+    students,
+    setSelectedStudent,
+    setIsDetailOpen,
+    setEditingStudent,
+    setIsFormOpen,
+    setIsAcademicUploadOpen,
+  } = useApp();
 
   const [selectedClass, setSelectedClass] = useState<string>('Semua');
   const [search, setSearch] = useState<string>('');
@@ -39,16 +46,27 @@ export const AcademicView: React.FC = () => {
             </p>
           </div>
 
-          <button
-            onClick={() => {
-              setEditingStudent(null);
-              setIsFormOpen(true);
-            }}
-            className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-xs transition-colors cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Input / Update Rapor Siswa</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setIsAcademicUploadOpen(true)}
+              className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors cursor-pointer"
+              title="Upload dan import nilai rapor semester massal dari Excel atau CSV"
+            >
+              <UploadCloud className="w-4 h-4 text-emerald-600" />
+              <span>Upload / Import Nilai Rapor</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setEditingStudent(null);
+                setIsFormOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-xs transition-colors cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Input / Update Rapor Siswa</span>
+            </button>
+          </div>
         </div>
 
         {/* Filters */}

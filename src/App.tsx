@@ -17,6 +17,9 @@ import { PrintBukuInduk } from './components/PrintBukuInduk';
 import { PrintRekapModal } from './components/PrintRekapModal';
 import { SchoolSettingsModal } from './components/SchoolSettingsModal';
 import { EditCredentialsModal } from './components/EditCredentialsModal';
+import { StudentUploadModal } from './components/StudentUploadModal';
+import { AcademicUploadModal } from './components/AcademicUploadModal';
+import { DeployGuideModal } from './components/DeployGuideModal';
 import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 
 const MainContent: React.FC = () => {
@@ -68,6 +71,9 @@ const MainContent: React.FC = () => {
           {/* Global Modals */}
           <StudentFormModal />
           <StudentDetailModal />
+          <StudentUploadModal />
+          <AcademicUploadModal />
+          <DeployGuideModal />
           <PrintBukuInduk />
           <PrintRekapModal />
           <SchoolSettingsModal />

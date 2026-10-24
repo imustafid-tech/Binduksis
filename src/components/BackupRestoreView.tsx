@@ -12,10 +12,11 @@ import {
   FileJson,
   FileSpreadsheet,
   ShieldAlert,
+  Rocket,
 } from 'lucide-react';
 
 export const BackupRestoreView: React.FC = () => {
-  const { students, profilSekolah, restoreBackup, resetToDefaultData, showToast } = useApp();
+  const { students, profilSekolah, restoreBackup, resetToDefaultData, setIsDeployGuideOpen, showToast } = useApp();
 
   const [previewBackup, setPreviewBackup] = useState<BackupData | null>(null);
   const [backupError, setBackupError] = useState<string | null>(null);
@@ -221,6 +222,34 @@ export const BackupRestoreView: React.FC = () => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Siap Deploy ke Hosting Section */}
+      <div className="bg-linear-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-xl p-5 shadow-sm border border-indigo-700/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-white/10 text-amber-300 flex items-center justify-center shrink-0 border border-white/20">
+            <Rocket className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="font-bold text-sm text-white">Siap Deploy Langsung ke Hosting</h4>
+              <span className="text-[10px] bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 px-2 py-0.5 rounded-full font-semibold">
+                Multi-Platform Ready
+              </span>
+            </div>
+            <p className="text-xs text-indigo-200/90 mt-1 max-w-xl leading-relaxed">
+              Konfigurasi Vercel (<code>vercel.json</code>), Netlify (<code>_redirects</code>), cPanel/Apache (<code>.htaccess</code>), VPS Nginx, dan <code>Dockerfile</code> sudah terpasang. Klik tombol di kanan untuk panduan langkah demi langkah.
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setIsDeployGuideOpen(true)}
+          className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-lg transition-colors cursor-pointer shrink-0 shadow-sm"
+        >
+          <Rocket className="w-4 h-4 text-slate-950" />
+          <span>Panduan Deploy Hosting</span>
+        </button>
       </div>
 
       {/* Danger Zone: Reset to Initial Data */}

@@ -12,6 +12,7 @@ import {
   ChevronDown,
   LogOut,
   KeyRound,
+  Rocket,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -29,6 +30,7 @@ export const Header: React.FC = () => {
     setEditingStudent,
     setIsPrintRekapOpen,
     setIsSchoolSettingsOpen,
+    setIsDeployGuideOpen,
   } = useApp();
 
 
@@ -126,6 +128,15 @@ export const Header: React.FC = () => {
                   aria-label="Pengaturan Profil Sekolah"
                 >
                   <Settings className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={() => setIsDeployGuideOpen(true)}
+                  className="hidden md:inline-flex items-center gap-1.5 bg-blue-600/30 hover:bg-blue-600 text-blue-200 hover:text-white border border-blue-500/40 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+                  title="Panduan Siap Deploy ke Hosting (Vercel, Netlify, cPanel, VPS, Docker)"
+                >
+                  <Rocket className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Deploy Hosting</span>
                 </button>
               </>
             ) : null}

@@ -18,6 +18,7 @@ import {
   Phone,
   CheckCircle2,
   RefreshCw,
+  UploadCloud,
 } from 'lucide-react';
 
 export const StudentListView: React.FC = () => {
@@ -32,6 +33,7 @@ export const StudentListView: React.FC = () => {
     setPrintingStudent,
     deleteStudent,
     setIsPrintRekapOpen,
+    setIsStudentUploadOpen,
     showToast,
   } = useApp();
 
@@ -96,6 +98,15 @@ export const StudentListView: React.FC = () => {
             >
               <PlusCircle className="w-4 h-4" />
               <span>Input Siswa Baru</span>
+            </button>
+
+            <button
+              onClick={() => setIsStudentUploadOpen(true)}
+              className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors cursor-pointer"
+              title="Upload file Excel (.xlsx) atau CSV data siswa massal"
+            >
+              <UploadCloud className="w-4 h-4 text-emerald-600" />
+              <span>Upload / Import Siswa</span>
             </button>
 
             <button
